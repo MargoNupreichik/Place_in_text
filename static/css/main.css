@@ -3,3 +3,31 @@
     height: 58px;
     width: 146px;
 }
+
+.cat_input{
+    float: left;
+    display: block;
+}
+
+#date {
+    margin-left: 5px;
+}
+
+#myMap {
+    height: 400px;
+    width: 800px;
+    float: right;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.scrollable{
+    height: 150px;
+    width: 350px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+    margin: 0 auto;
+    float: left;
+}
