@@ -1,65 +1,67 @@
-{% extends 'temp.html'%}
-
-{% block title %}
-Главная страница
-{% endblock %}
-
-{% block script %}
+{% extends 'temp.html'%} {% block title %} Главная страница {% endblock %} {%
+block script %}
 <!--p><script src="https://api-maps.yandex.ru/2.0-stable/?apikey=805355ea-2dbe-4b5c-981b-313ffc2d18f3&load=package.full&lang=ru-RU"
     type="text/javascript"></script></p-->
-<script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
-    <script type="text/javascript">
-        ymaps.ready(init);
-        function init() {
-            var myMap = new ymaps.Map('myMap', {
-                center: [55.76, 37.64],
-                zoom: 7,
-                type: 'yandex#satellite'
-            });
-        }
-    </script>
-{% endblock%}
-
-{% block body %}
-<h2>Фильтр:</h2>
-<form>
+<script
+  src="http://api-maps.yandex.ru/2.1/?lang=ru_RU"
+  type="text/javascript"
+></script>
+<script type="text/javascript">
+  ymaps.ready(init);
+  function init() {
+    var myMap = new ymaps.Map("myMap", {
+      center: [55.76, 37.64],
+      zoom: 7
+    });
+  }
+</script>
+{% endblock%} {% block body %}
+<div class="left_side">
+  <h2>Фильтр:</h2>
+  <form>
     <p>
-        <label class="cat_input" for="date">с: </label>
-        <input type="date" class="cat_input"  id="date" name="date" />
+      <label class="cat_input" for="date">с: </label>
+      <input type="date" class="cat_input" id="date" name="date" />
     </p>
     <p>
-        <label class="cat_input" for="date" id="date">по: </label>
-        <input type="date" class="cat_input" id="date" name="date" />
+      <label class="cat_input" for="date" id="date">по: </label>
+      <input type="date" class="cat_input" id="date" name="date" />
     </p>
-    <br>
+    <br />
     <p>
-        <br>Упорядочить по местоположению?  <input type="checkbox" id="place_order" checked name="html5" />
+      <br />Упорядочить по местоположению?
+      <input type="checkbox" id="place_order" checked name="html5" />
     </p>
     <p>
-        <button type="submit">Поиск</button>
+      <button type="submit">Поиск</button>
     </p>
-</form>
-<div class="scrollable">
-    <table>
+  </form>
+  <form>
+    <div class="scrollable">
+      <table>
         <tr>
-            <td onclick="handleClick(this)">Элемент 1</td>
+          <td onclick="handleClick(this)">Элемент 1</td>
         </tr>
         <tr>
-            <td onclick="handleClick(this)">Элемент 2</td>
+          <td onclick="handleClick(this)">Элемент 2</td>
         </tr>
         <tr>
-            <td onclick="handleClick(this)">Элемент 3</td>
+          <td onclick="handleClick(this)">Элемент 3</td>
         </tr>
-    </table>
-</div>
-<script>
-    function handleClick(elem) {
+      </table>
+    </div>
+    <script>
+      function handleClick(elem) {
         // Обработка нажатия на элемент таблицы
         console.log(elem.innerText + " был выбран");
-    }
-</script>
-{% endblock %}
-
-{% block maps%}
+      }
+    </script>
+    <br /><br /><br /><br /><br /><br /><br />
+    <div class="chosen_text">
+      <p>Здесь будет отображаться выбранный текст.</p>
+    </div>
+  </form>
+</div>
+{% endblock %} {% block maps%}
 <div id="myMap"></div>
 {% endblock %}

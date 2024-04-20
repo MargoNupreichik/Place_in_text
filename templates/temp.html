@@ -23,8 +23,10 @@
                 <li><a href="{{ url_for('about') }}" class="nav-link px-2">О проекте</a></li>
             </ul>
         </header>
-        {% block body %}{% endblock %}
-        {% block maps %}{% endblock %}
+        <div class="data">
+            {% block body %}{% endblock %}
+            {% block maps %}{% endblock %}
+        </div>
     </div>
 </body>
 </html>
