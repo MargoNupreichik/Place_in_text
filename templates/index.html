@@ -2,10 +2,7 @@
 block script %}
 <!--p><script src="https://api-maps.yandex.ru/2.0-stable/?apikey=805355ea-2dbe-4b5c-981b-313ffc2d18f3&load=package.full&lang=ru-RU"
     type="text/javascript"></script></p-->
-<script
-  src="http://api-maps.yandex.ru/2.1/?lang=ru_RU"
-  type="text/javascript"
-></script>
+<script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 <script type="text/javascript">
   ymaps.ready(init);
   function init() {
@@ -38,23 +35,19 @@ block script %}
   </form>
   <form>
     <div class="scrollable">
-      <table>
-        <tr>
-          <td onclick="handleClick(this)">Элемент 1</td>
-        </tr>
-        <tr>
-          <td onclick="handleClick(this)">Элемент 2</td>
-        </tr>
-        <tr>
-          <td onclick="handleClick(this)">Элемент 3</td>
-        </tr>
-      </table>
+      <ul>
+        {% for string in strings %}
+        <li><a href="#" class="string-link">{{ string }}</a></li>
+        {% endfor %}
+      </ul>
     </div>
     <script>
-      function handleClick(elem) {
-        // Обработка нажатия на элемент таблицы
-        console.log(elem.innerText + " был выбран");
-      }
+        document.querySelectorAll('.string-link').forEach(item => {
+            item.addEventListener('click', event => {
+                // Обработчик нажатия на каждую строку
+                alert('Вы нажали на строку: ' + event.target.textContent);
+            });
+        });
     </script>
     <br /><br /><br /><br /><br /><br /><br />
     <div class="chosen_text">

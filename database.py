@@ -1,7 +1,7 @@
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
-
+from sqlalchemy.ext.declarative import declarative_base
 from local_settings import postgresql as settings
 
 
@@ -19,7 +19,14 @@ def get_engine_from_session():
         raise Exception('Bad config file.')
     return get_engine(settings['pguser'], settings['pgpassword'], settings['pghost'], settings['pgport'], settings['pgdb'])
 
+# !!!
 engine = get_engine_from_session()
+# !!!
+
+session = sessionmaker(engine)
+
+# class Base(DeclarativeBase):
+#     pass
 
 def tester():
     with engine.connect() as conn:
