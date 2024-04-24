@@ -45,10 +45,11 @@ class SyncCore:
             if order_by_loc:
                 query = select([data_table.c.id, data_table.c.art_date, data_table.c.loc]).\
                     where(data_table.c.art_date.between(left_data, right_data)).\
-                    order_by(data_table.c.loc)
+                    order_by(data_table.c.art_date.desc(), data_table.c.loc.desc())
             else:
-                query = select([data_table.c.id, data_table.c.art_date, data_table.c.loc]).\
-                    where(data_table.c.art_date.between(left_data, right_data))
+                query = select([data_table.c.id, data_table.c.art_date, data_table.c.loc, data_table.c.article]).\
+                    where(data_table.c.art_date.between(left_data, right_data)).\
+                    order_by(data_table.c.art_date.desc())
             
             result = conn.execute(query)
             articles = result.all()

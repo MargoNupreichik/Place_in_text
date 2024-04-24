@@ -18,40 +18,65 @@ block script %}
   <form>
     <p>
       <label class="cat_input" for="date">с: </label>
-      <input type="date" class="cat_input" id="date" name="date" />
+      <input type="date" class="cat_input" id="date1" name="date" value="{{ l_d }}"/>
     </p>
     <p>
-      <label class="cat_input" for="date" id="date">по: </label>
-      <input type="date" class="cat_input" id="date" name="date" />
+      <label class="cat_input" for="date">по: </label>
+      <input type="date" class="cat_input" id="date2" name="date" value="{{ r_d }}"/>
     </p>
     <br />
     <p>
       <br />Упорядочить по местоположению?
-      <input type="checkbox" id="place_order" checked name="html5" />
+      <input type="checkbox" id="place_order" name="html5"/>
     </p>
     <p>
-      <button type="submit">Поиск</button>
+      <button type="submit" onclick="updateForm()">Поиск</button>
     </p>
   </form>
+  <script>
+    
+    function updateForm() {
+      var left_date = document.getElementById("date1").value;
+      var right_date = document.getElementById("date2").value;
+      var order = document.getElementById("place_order").value;
+      
+      if (order == "on") {
+        order = true;
+      } else {
+        order = false;
+      }
+      
+      var data = "" + left_date + "/" + right_date + "/" + order;
+      $.post("/process_data/", {'data':data});
+    }
+
+  </script>
   <form>
     <div class="scrollable">
-      <ul>
-        {% for string in strings %}
-        <li><a href="#" class="string-link">{{ string }}</a></li>
+      <table>
+        {% for i in range(strings|length) %}
+        <tr data-unique-id="{{ i }}">
+          <td><a href="#" class="string-link">{{ strings[i] }}</a></td>
+        </tr>
         {% endfor %}
-      </ul>
+      </table>
     </div>
     <script>
+        var articles = {{ articles | safe}};
         document.querySelectorAll('.string-link').forEach(item => {
             item.addEventListener('click', event => {
                 // Обработчик нажатия на каждую строку
-                alert('Вы нажали на строку: ' + event.target.textContent);
+              var uniqueId = parseInt(event.target.closest('tr').dataset.uniqueId, 10);
+              // alert('Вы нажали на строку с уникальным ID: ' + uniqueId);
+              var article = articles[uniqueId];
+              document.getElementById('field_text').textContent = article;
             });
         });
     </script>
     <br /><br /><br /><br /><br /><br /><br />
-    <div class="chosen_text">
+    <div class="chosen_text" id="field_text">
       <p>Здесь будет отображаться выбранный текст.</p>
+      <!-- <p>{{ articles[0] }}</p> -->
     </div>
   </form>
 </div>
