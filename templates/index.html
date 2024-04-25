@@ -1,8 +1,7 @@
 {% extends 'temp.html'%} {% block title %} Главная страница {% endblock %} {%
 block script %}
-<!--p><script src="https://api-maps.yandex.ru/2.0-stable/?apikey=805355ea-2dbe-4b5c-981b-313ffc2d18f3&load=package.full&lang=ru-RU"
-    type="text/javascript"></script></p-->
-<script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+<!-- <script src="https://api-maps.yandex.ru/2.0-stable/?apikey=76feaae7-5b5d-4246-9b92-2f897ae1c311&load=package.full&lang=ru-RU" type="text/javascript"></script> -->
+<!-- <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script> -->
 <script type="text/javascript">
   ymaps.ready(init);
   function init() {
@@ -10,6 +9,13 @@ block script %}
       center: [55.76, 37.64],
       zoom: 7
     });
+
+    var myPlaceMark = new ymaps.Placemark([55.76, 37.64], {
+      iconContent: 'Москва', // текст на иконке
+    }, {
+      present: 'twirl#blueStretchyIcon' // тип иконки
+    });
+    myMap.geoObjects.add(myPlaceMark);
   }
 </script>
 {% endblock%} {% block body %}
@@ -21,13 +27,13 @@ block script %}
       <input type="date" class="cat_input" id="date1" name="date" value="{{ l_d }}"/>
     </p>
     <p>
-      <label class="cat_input" for="date">по: </label>
+      <label class="cat_input" for="date"> по: </label>
       <input type="date" class="cat_input" id="date2" name="date" value="{{ r_d }}"/>
     </p>
     <br />
     <p>
       <br />Упорядочить по местоположению?
-      <input type="checkbox" id="place_order" name="html5"/>
+      <input type="checkbox" id="place_order" {% if order_loc %} checked {% endif %} name="html5"/>
     </p>
     <p>
       <button type="submit" onclick="updateForm()">Поиск</button>
@@ -38,14 +44,7 @@ block script %}
     function updateForm() {
       var left_date = document.getElementById("date1").value;
       var right_date = document.getElementById("date2").value;
-      var order = document.getElementById("place_order").value;
-      
-      if (order == "on") {
-        order = true;
-      } else {
-        order = false;
-      }
-      
+      var order = document.getElementById("place_order").checked;
       var data = "" + left_date + "/" + right_date + "/" + order;
       $.post("/process_data/", {'data':data});
     }
@@ -63,6 +62,7 @@ block script %}
     </div>
     <script>
         var articles = {{ articles | safe}};
+        var places = {{ places | safe }}
         document.querySelectorAll('.string-link').forEach(item => {
             item.addEventListener('click', event => {
                 // Обработчик нажатия на каждую строку
@@ -70,6 +70,8 @@ block script %}
               // alert('Вы нажали на строку с уникальным ID: ' + uniqueId);
               var article = articles[uniqueId];
               document.getElementById('field_text').textContent = article;
+              var place = places[uniqueId];
+              
             });
         });
     </script>

@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 left = datetime.date(2000, 1, 1)
 right = datetime.date(2000, 1, 10)
-order = "cheked"
+order = "cheсked"
 
 
 def prep_strings(string):
@@ -23,18 +23,30 @@ def prep_strings(string):
 def prep_texts(string):
     return str(string[3])
 
+def prep_places(string):
+    return str(string[2])
+
 # декоратор - обработчик
 # главная страница
 @app.route("/index")
 @app.route("/")
 def index():
-    strings = core.SyncCore.select_to_html(left, right)
+    global order
+    order_l = True if order == "true" else False
+    strings = core.SyncCore.select_to_html(left, right, order_by_loc=order_l)
     strings_ = []
+    places_ = []
     articles_ = []
     for st in strings:
-        strings_.append(prep_strings(st))
+        st_ = prep_strings(st)
+        st_loc = list(st_.split(' '))[-1]
+        strings_.append(st_)
         articles_.append(prep_texts(st))
-    return render_template('index.html', strings=strings_, articles=articles_, l_d=left, r_d=right, order=order)
+        places_.append(st_loc)
+    print(places_[0])
+    return render_template('index.html', strings=strings_, articles=articles_, 
+                           l_d=left, r_d=right, order_loc=order_l,
+                           places=places_)
 
 @app.route("/about") 
 def about():
@@ -45,12 +57,18 @@ def about():
 def updating():
     data = request.form['data']
     print(data)
-    left_, right_, order = data.split('/')
+    left_, right_, order_ = data.split('/')
     print(left_, right_)
     global left 
     left = datetime.datetime.strptime(left_, '%Y-%m-%d').date()
     global right 
     right = datetime.datetime.strptime(right_, '%Y-%m-%d').date()
+    print('-----------------------------------------------')
+    print(order_)
+    global order
+    order = order_
+    print('----------------------------------------------------------------')
+    print(order, order_, sep='<---')
     return redirect(url_for('index'))   
 
 # файл основной для данного приложения
