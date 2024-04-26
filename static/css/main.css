@@ -33,7 +33,7 @@
 }
 
 .chosen_text{
-    height: 200px;
+    height: 150px;
     width: 350px;
     overflow-y: scroll;
     border: 1px solid #ccc;

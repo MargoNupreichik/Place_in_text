@@ -37,6 +37,7 @@ def index():
     strings_ = []
     places_ = []
     articles_ = []
+    geo_=[]
     for st in strings:
         st_ = prep_strings(st)
         st_loc = list(st_.split(' '))[-1]
