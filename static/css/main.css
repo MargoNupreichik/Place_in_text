@@ -1,23 +1,16 @@
-
-.header_logo{
+.header_logo {
     height: 58px;
     width: 146px;
 }
 
-.cat_input{
+.cat_input {
     float: left;
     display: block;
-}
-
-#date1, #date2 {
-    margin-left: 5px;
+    margin: 2px;
 }
 
 #myMap {
-    height: 550px;
-    width: 900px;
-    float: right;
-    border: 1px solid #ccc;
+    height: 444px;
     padding: 10px;
 }
 
@@ -27,7 +20,7 @@
     overflow-y: scroll;
     border: 1px solid #ccc;
     padding: 10px;
-    text-align: left;
+    text-align: center;
     margin: 0 auto;
     float: left;
 }
@@ -43,7 +36,13 @@
     float: left;
 }
 
-.left_side{
-    display: inline;
-    float: left;
+.card {
+    padding: 16px;
+    margin: 8px;
+    display: flex;
+}
+
+table {
+    max-width:100%;
+    white-space:nowrap;
 }

@@ -18,13 +18,16 @@ order = "cheсked"
 
 
 def prep_strings(string):
-    return string[1].strftime("%B %d, %Y") + " " + string[2]
+    return string[1].strftime("%B %d, %Y") + " " + string[2][int(not string[2][0].istitle()):]
+
 
 def prep_texts(string):
     return str(string[3])
 
+
 def prep_places(string):
     return str(string[2])
+
 
 # декоратор - обработчик
 # главная страница
@@ -37,17 +40,16 @@ def index():
     strings_ = []
     places_ = []
     articles_ = []
-    geo_=[]
     for st in strings:
         st_ = prep_strings(st)
-        st_loc = list(st_.split(' '))[-1]
+        st_loc = ' '.join(st_.split(' ')[3:])
         strings_.append(st_)
         articles_.append(prep_texts(st))
         places_.append(st_loc)
     print(places_[0])
-    return render_template('index.html', strings=strings_, articles=articles_, 
-                           l_d=left, r_d=right, order_loc=order_l,
-                           places=places_)
+    return render_template('index.html', strings=strings_, articles=articles_,
+                           l_d=left, r_d=right, order_loc=order_l, places=places_)
+
 
 @app.route("/about") 
 def about():
@@ -72,10 +74,10 @@ def updating():
     print(order, order_, sep='<---')
     return redirect(url_for('index'))   
 
+
 # файл основной для данного приложения
 if __name__ == '__main__':
     # debug = True нужно чтобы сервер автоматически перезапускался
     # не нужно перезапускать программу - обновили в браузере и все
     # database.tester()
-    app.run(debug=True)
-    
+    app.run()

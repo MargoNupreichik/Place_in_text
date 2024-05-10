@@ -8,7 +8,17 @@ block script %}
   function init(coord=[55.76, 37.64]) {
     myMap = new ymaps.Map("myMap", {
       center: coord,
-      zoom: 7
+      zoom: 8,
+    });
+
+    myMap.behaviors.enable('scrollZoom', {
+      maximumDelta: 1,
+      speed: 1
+    });
+
+    myMap.controls.add('zoomControl', {
+      size: 'small',
+      zoomDuration: 100
     });
 
     var myPlaceMark = new ymaps.Placemark(coord, {
@@ -20,6 +30,9 @@ block script %}
   }
 
   function update(coords) {
+    myMap.geoObjects.each(function(context) {
+      myMap.geoObjects.remove(context);
+    });
     myMap.setCenter(coords);
     var myPlaceMark = new ymaps.Placemark(coords, {
       iconContent: ' ', // текст на иконке
@@ -31,95 +44,121 @@ block script %}
 
 </script>
 {% endblock%} {% block body %}
-<div class="left_side">
-  <h2>Фильтр:</h2>
-  <form>
-    <p>
-      <label class="cat_input" for="date">с: </label>
-      <input type="date" class="cat_input" id="date1" name="date" value="{{ l_d }}"/>
-    </p>
-    <p>
-      <label class="cat_input" for="date"> по: </label>
-      <input type="date" class="cat_input" id="date2" name="date" value="{{ r_d }}"/>
-    </p>
-    <br />
-    <p>
-      <br />Упорядочить по местоположению?
-      <input type="checkbox" id="place_order" {% if order_loc %} checked {% endif %} name="html5"/>
-    </p>
-    <p>
-      <button type="submit" onclick="updateForm()">Поиск</button>
-    </p>
-  </form>
-  <script>
-    
-    function updateForm() {
-      var left_date = document.getElementById("date1").value;
-      var right_date = document.getElementById("date2").value;
-      var order = document.getElementById("place_order").checked;
-      var data = "" + left_date + "/" + right_date + "/" + order;
-      $.post("/process_data/", {'data':data});
-    }
-
-  </script>
-  <form>
-    <div class="scrollable">
-      <table>
-        {% for i in range(strings|length) %}
-        <tr data-unique-id="{{ i }}">
-          <td><a href="#" class="string-link">{{ strings[i] }}</a></td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-    <script>
-        var articles = {{ articles | safe}};
-        var places = {{ places | safe }}
-        document.querySelectorAll('.string-link').forEach(item => {
+<div class="container">
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h4 class="card-title">Фильтр</h4>
+            <form>
+              <div class="input-group">
+                <label class="cat_input" for="date1" style="margin:2px 4px 6px 0px;">с:</label>
+                <input class="cat_input" type="date" id="date1" name="date" value="{{ l_d }}" min="1999-08-31" max="2018-12-15"/>
+                <label class="cat_input" for="date2" style="margin:2px 4px 6px 0px;">по:</label>
+                <input class="cat_input" type="date" id="date2" name="date" value="{{ r_d }}" min="1999-08-31" max="2018-12-15"/>
+              </div>
+              <div class="form-check" style="margin:4px 0px 2px 0px;">
+                <label class="form-check-label"><input class="form-check-input" type="checkbox" id="place_order" value="" {% if order_loc %} checked {% endif %} name="html5"/>Упорядочить по местоположению?</label>
+              </div>
+              <button class="btn btn-primary" type="submit" onclick="updateForm()" style="margin:4px 0px 2px 0px;">Поиск</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <script>
+        function updateForm() {
+          var left_date = document.getElementById("date1").value;
+          var right_date = document.getElementById("date2").value;
+          var check_left = new Date(left_date);
+          var check_right = new Date(right_date);
+          if (check_left.getTime() > check_right.getTime()) {
+            alert("Ошибка: неверно выбран диапазон дат.\nУбедитесь, что дата начала не позже даты конца.");
+          } else {
+            var order = document.getElementById("place_order").checked;
+            var data = "" + left_date + "/" + right_date + "/" + order;
+            $.post("/process_data/", {'data':data});
+          }
+        }
+      </script>
+      <form>
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <h4 class="card-title">Результат запроса</h4>
+              <div class="scrollable">
+                <table>
+                  {% for i in range(strings|length) %}
+                  <tr data-unique-id="{{ i }}">
+                    <td><a href="#" class="btn btn-light text-wrap" style="width:100%;">{{ strings[i] }}</a></td>
+                  </tr>
+                  {% endfor %}
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+          var articles = {{ articles | safe}};
+          var places = {{ places | safe }}
+          document.querySelectorAll('.btn.btn-light').forEach(item => {
             item.addEventListener('click', event => {
                 // Обработчик нажатия на каждую строку
               var uniqueId = parseInt(event.target.closest('tr').dataset.uniqueId, 10);
-              // alert('Вы нажали на строку с уникальным ID: ' + uniqueId);
               var article = articles[uniqueId];
               document.getElementById('field_text').textContent = article;
               var place = places[uniqueId];
-              // const Http = new XMLHttpRequest();
-              const url = "https://catalog.api.2gis.com/3.0/items/geocode?q=" + place +
-               "&fields=items.point,items.geometry.centroid&key=9f2242fe-2ba0-47d1-a46f-2003c5a99fc7";
-              // Http.open("GET", url);
-              // Http.send();
-              // Http.onreadystatechange = (e) => {
-              //   console.log(Http.responseText);  // => получим массив данных в формате JSON
-              // }
+              const url = "https://nominatim.openstreetmap.org/search?q=" + place + "&format=geocodejson";
               let result;
               $.get(url, function(data, status) {
-                code = data.meta.code;
-                if (Number(code) > 199 && Number(code) < 300) {
-                  result = data.result.items[0].geometry.centroid;
-                  latitude = result.slice(6,15);
-                  longitude = result.slice(-10, -1);
+                if (data.features.length === 0) {
+                  alert("Ошибка: не удалось декодировать выбранный объект.\nВнимание: на карте остался предыдущий объект.");
+                } else {
+                   result = data.features[0].geometry.coordinates;
+                  longitude = result[1];
+                  latitude = result[0];
                   document.getElementById('latitude').textContent = latitude;
                   document.getElementById('longitude').textContent = longitude;
                   update([longitude, latitude]);
-                } else {
-                  alert("error: can't decode place into coordinate.\nwarning! longitude and latitude belong to the last selected text");
                 }
               });
             });
         });
-    </script>
-    <br /><br /><br /><br /><br /><br /><br />
-    <div class="chosen_text" id="field_text">
-      <p>Здесь будет отображаться выбранный текст.</p>
-      <!-- <p>{{ articles[0] }}</p> -->
+        </script>
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <h4 class="card-title">Текст статьи</h4>
+              <div class="chosen_text" id="field_text">
+                <p>Здесь будет отображаться выбранный текст.</p>
+                <!-- <p>{{ articles[0] }}</p> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
     </div>
-  </form>
-  <p class="coord">
-    <span>Ширина: <label id="latitude">37.617774</label></span>
-    <br/>
-    <span>Долгота: <label id="longitude">55.755836</label></span>
-  </p>
+    {% endblock %}
+    {% block maps%}
+    <div class="col-sm-8">
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h4 class="card-title">Карта</h4>
+            <div id="myMap" style=""></div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <h4 class="card-title">Координаты объекта</h4>
+            <span>Ширина: <label id="latitude">37.617774</label></span>
+            <span>Долгота: <label id="longitude">55.755836</label></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endblock %}
+  </div>
 </div>
-{% endblock %} {% block maps%}
-<div id="myMap"></div>
-{% endblock %}
