@@ -11,7 +11,6 @@ order = "cheсked"
 
 
 def prep_strings(string) -> str:
-
     """
     Функция-обработчик prep_strings.
     Склеивает поля "дата" и "локация" и возвращает полученную строку.
@@ -24,7 +23,6 @@ def prep_strings(string) -> str:
 
 
 def prep_texts(string) -> str:
-
     """
     Функция-обработчик prep_texts.
     Преобразует поле "текст статьи" в строковый тип и возвращает результат.
@@ -39,7 +37,6 @@ def prep_texts(string) -> str:
 @app.route("/index")
 @app.route("/")
 def index() -> str:
-
     """
     Обработчик страниц / и /index (основные страницы приложения).
     Подтягивает данные с базы данных по запросу пользователя и вовзвращает их обратно в приложение.
@@ -61,12 +58,11 @@ def index() -> str:
         places_.append(st_loc)
     print(places_[0])
     return flask.render_template('index.html', strings=strings_, articles=articles_,
-                           l_d=left, r_d=right, order_loc=order_l, places=places_)
+                                 l_d=left, r_d=right, order_loc=order_l, places=places_)
 
 
 @app.route("/about")
 def about() -> str:
-
     """
     Обработчик страницы /about ("О проекте").
 
@@ -78,7 +74,6 @@ def about() -> str:
 
 @app.route('/process_data/', methods=['GET', 'POST'])
 def updating() -> werkzeug.Response:
-
     """
     Обработчик страницы /process_data/ (вызывается при нажатии кнопки "Поиск").
     Меняет значения на полученные с приложения и обновляет главную страницу.
@@ -102,7 +97,6 @@ def updating() -> werkzeug.Response:
 
 
 if __name__ == '__main__':
-
     """
     Точка входа в приложение.
     
