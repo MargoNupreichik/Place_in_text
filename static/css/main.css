@@ -16,7 +16,7 @@
 
 .scrollable {
     height: 150px;
-    width: 350px;
+    width: 100%;
     overflow-y: scroll;
     border: 1px solid #ccc;
     padding: 10px;
@@ -27,7 +27,7 @@
 
 .chosen_text{
     height: 150px;
-    width: 350px;
+    width: 100%;
     overflow-y: scroll;
     border: 1px solid #ccc;
     padding: 10px;

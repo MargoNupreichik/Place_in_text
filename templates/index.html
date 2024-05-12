@@ -114,7 +114,7 @@ block script %}
                 if (data.features.length === 0) {
                   alert("Ошибка: не удалось декодировать выбранный объект.\nВнимание: на карте остался предыдущий объект.");
                 } else {
-                   result = data.features[0].geometry.coordinates;
+                  result = data.features[0].geometry.coordinates;
                   longitude = result[1];
                   latitude = result[0];
                   document.getElementById('latitude').textContent = latitude;

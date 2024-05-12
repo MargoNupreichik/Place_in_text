@@ -1,39 +1,52 @@
-from flask import Flask, render_template, request, redirect, url_for
-
+import flask
 import datetime
-
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
-
-import database
+import werkzeug
 import core
 
-from local_settings import postgresql as settings
-
-app = Flask(__name__)
+app = flask.app.Flask(__name__)
 
 left = datetime.date(2000, 1, 1)
 right = datetime.date(2000, 1, 10)
 order = "cheсked"
 
 
-def prep_strings(string):
-    return string[1].strftime("%B %d, %Y") + " " + string[2][int(not string[2][0].istitle()):]
+def prep_strings(string) -> str:
+
+    """
+    Функция-обработчик prep_strings.
+    Склеивает поля "дата" и "локация" и возвращает полученную строку.
+
+    :param string: object
+    :return: str
+    """
+
+    return string[1].strftime("%B %d, %Y") + " " + string[2]
 
 
-def prep_texts(string):
+def prep_texts(string) -> str:
+
+    """
+    Функция-обработчик prep_texts.
+    Преобразует поле "текст статьи" в строковый тип и возвращает результат.
+
+    :param string: object
+    :return: str
+    """
+
     return str(string[3])
 
 
-def prep_places(string):
-    return str(string[2])
-
-
-# декоратор - обработчик
-# главная страница
 @app.route("/index")
 @app.route("/")
-def index():
+def index() -> str:
+
+    """
+    Обработчик страниц / и /index (основные страницы приложения).
+    Подтягивает данные с базы данных по запросу пользователя и вовзвращает их обратно в приложение.
+
+    :return: str
+    """
+
     global order
     order_l = True if order == "true" else False
     strings = core.SyncCore.select_to_html(left, right, order_by_loc=order_l)
@@ -47,37 +60,59 @@ def index():
         articles_.append(prep_texts(st))
         places_.append(st_loc)
     print(places_[0])
-    return render_template('index.html', strings=strings_, articles=articles_,
+    return flask.render_template('index.html', strings=strings_, articles=articles_,
                            l_d=left, r_d=right, order_loc=order_l, places=places_)
 
 
-@app.route("/about") 
-def about():
-    return render_template('about.html')
+@app.route("/about")
+def about() -> str:
+
+    """
+    Обработчик страницы /about ("О проекте").
+
+    :return: str
+    """
+
+    return flask.render_template('about.html')
 
 
 @app.route('/process_data/', methods=['GET', 'POST'])
-def updating():
-    data = request.form['data']
+def updating() -> werkzeug.Response:
+
+    """
+    Обработчик страницы /process_data/ (вызывается при нажатии кнопки "Поиск").
+    Меняет значения на полученные с приложения и обновляет главную страницу.
+
+    :return: werkzeug.Response
+    """
+
+    global order, left, right
+    data: str = flask.request.form['data']
     print(data)
     left_, right_, order_ = data.split('/')
     print(left_, right_)
-    global left 
     left = datetime.datetime.strptime(left_, '%Y-%m-%d').date()
-    global right 
     right = datetime.datetime.strptime(right_, '%Y-%m-%d').date()
     print('-----------------------------------------------')
     print(order_)
-    global order
     order = order_
     print('----------------------------------------------------------------')
     print(order, order_, sep='<---')
-    return redirect(url_for('index'))   
+    return flask.redirect(flask.url_for('index'))
 
 
-# файл основной для данного приложения
 if __name__ == '__main__':
-    # debug = True нужно чтобы сервер автоматически перезапускался
-    # не нужно перезапускать программу - обновили в браузере и все
-    # database.tester()
-    app.run()
+
+    """
+    Точка входа в приложение.
+    
+    Для теста базы данных перед запуском приложения можно написать database.tester()
+    
+    Для перевода приложения в режим отладки добавить необязательный аргумент:
+    app.run() -> app.run(debug=True)
+    
+    Режим отладки отображает исключения вместо страницы с кодом 500 и позволяет настраивать любую часть приложения
+    на ходу.
+    """
+
+    app.run(debug=True)
