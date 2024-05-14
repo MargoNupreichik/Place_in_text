@@ -103,7 +103,7 @@ block script %}
           var places = {{ places | safe }}
           document.querySelectorAll('.btn.btn-light').forEach(item => {
             item.addEventListener('click', event => {
-                // Обработчик нажатия на каждую строку
+              // Обработчик нажатия на каждую кнопку
               var uniqueId = parseInt(event.target.closest('tr').dataset.uniqueId, 10);
               var article = articles[uniqueId];
               document.getElementById('field_text').textContent = article;
