@@ -2,12 +2,17 @@ import flask
 import datetime
 import werkzeug
 import core
+import requests
 
 app = flask.app.Flask(__name__)
 
-left = datetime.date(2000, 1, 1)
-right = datetime.date(2000, 1, 10)
-order = "cheсked"
+left = datetime.date(2014, 3, 16)
+right = datetime.date(2014, 3, 18)
+order = "checked"
+strings_ = []
+places_ = []
+articles_ = []
+coords_ = []
 
 
 def prep_strings(string) -> str:
@@ -43,22 +48,24 @@ def index() -> str:
 
     :return: str
     """
-
-    global order
+    global order, strings_, places_, articles_, coords_
     order_l = True if order == "true" else False
-    strings = core.SyncCore.select_to_html(left, right, order_by_loc=order_l)
-    strings_ = []
-    places_ = []
-    articles_ = []
-    for st in strings:
-        st_ = prep_strings(st)
-        st_loc = ' '.join(st_.split(' ')[3:])
-        strings_.append(st_)
-        articles_.append(prep_texts(st))
-        places_.append(st_loc)
+    if len(strings_) == 0:  # если данных еще не было загружено в систему, нужно загрузить их с базы данных
+        strings = core.SyncCore.select_to_html(left, right, order_by_loc=order_l)
+        for st in strings:
+            st_ = prep_strings(st)
+            st_loc = ' '.join(st_.split(' ')[3:])
+            req = requests.get(f"https://nominatim.openstreetmap.org/search",
+                               headers={'Accept': 'application/json', 'User-Agent': 'Modeler'},
+                               params={'q': st_loc, 'format': 'json'}).json()
+            if req:
+                strings_.append(st_)
+                articles_.append(prep_texts(st))
+                places_.append(st_loc)
+                coords_.append([float(req[0]['lat']), float(req[0]['lon'])])
     print(places_[0])
     return flask.render_template('index.html', strings=strings_, articles=articles_,
-                                 l_d=left, r_d=right, order_loc=order_l, places=places_)
+                                 l_d=left, r_d=right, order_loc=order_l, places=places_, coords=coords_)
 
 
 @app.route("/about")
@@ -81,13 +88,20 @@ def updating() -> werkzeug.Response:
     :return: werkzeug.Response
     """
 
-    global order, left, right
+    global order, left, right, strings_, places_, articles_, coords_
     data: str = flask.request.form['data']
     print(data)
     left_, right_, order_ = data.split('/')
     print(left_, right_)
-    left = datetime.datetime.strptime(left_, '%Y-%m-%d').date()
-    right = datetime.datetime.strptime(right_, '%Y-%m-%d').date()
+    left_ = datetime.datetime.strptime(left_, '%Y-%m-%d').date()
+    right_ = datetime.datetime.strptime(right_, '%Y-%m-%d').date()
+    if left_ != left or right_ != right:
+        strings_ = []
+        places_ = []
+        articles_ = []
+        coords_ = []
+    left = left_
+    right = right_
     print('-----------------------------------------------')
     print(order_)
     order = order_

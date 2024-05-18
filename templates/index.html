@@ -1,10 +1,10 @@
 {% extends 'temp.html'%} {% block title %} Главная страница {% endblock %} {%
 block script %}
 <!-- <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script> -->
-<script src="https://api-maps.yandex.ru/2.0-stable/?apikey=5595cc61-5dc4-4943-bc23-3bbc15bd35c5&load=package.full&lang=ru-RU" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.0-stable/?apikey=66a3cd56-8376-4597-b26d-d3371d845c19&load=package.full&lang=ru-RU" type="text/javascript"></script>
 <script type="text/javascript">
   ymaps.ready(init);
-  var myMap;
+  var myMap, clusterer, geoObjects = [], rectangle;
   function init(coord=[55.76, 37.64]) {
     myMap = new ymaps.Map("myMap", {
       center: coord,
@@ -21,25 +21,33 @@ block script %}
       zoomDuration: 100
     });
 
-    var myPlaceMark = new ymaps.Placemark(coord, {
-      iconContent: ' ', // текст на иконке
-    }, {
-      present: 'twirl#redStretchyIcon' // тип иконки
+    clusterer = new ymaps.Clusterer({
+      preset: 'twirl#blueClusterIcons',
+      groupByCoordinates: false,
+      clusterDisableClickZoom: true
     });
-    myMap.geoObjects.add(myPlaceMark);
+
+    let strings = {{ strings | safe }},
+        articles = {{ articles | safe }},
+        coords = {{ coords | safe }};
+
+    for (let i = 0, len = articles.length; i < len; i++) {
+      geoObjects[i] = new ymaps.Placemark(coords[i], {
+        balloonContentHeader: strings[i],
+        balloonContentBody: articles[i],
+        clusterCaption: strings[i]
+      }, {
+        preset: 'twirl#blueIcon'
+      });
+    }
+
+    clusterer.add(geoObjects);
+
+    myMap.geoObjects.add(clusterer);
   }
 
-  function update(coords) {
-    myMap.geoObjects.each(function(context) {
-      myMap.geoObjects.remove(context);
-    });
+  function show(coords) {
     myMap.setCenter(coords);
-    var myPlaceMark = new ymaps.Placemark(coords, {
-      iconContent: ' ', // текст на иконке
-    }, {
-      present: 'twirl#redStretchyIcon' // тип иконки
-    });
-    myMap.geoObjects.add(myPlaceMark);
   }
 
 </script>
@@ -77,7 +85,7 @@ block script %}
           } else {
             var order = document.getElementById("place_order").checked;
             var data = "" + left_date + "/" + right_date + "/" + order;
-            $.post("/process_data/", {'data':data});
+            $.post("/process_data/", {'data': data});
           }
         }
       </script>
@@ -99,31 +107,20 @@ block script %}
           </div>
         </div>
         <script>
-          var articles = {{ articles | safe}};
-          var places = {{ places | safe }}
           document.querySelectorAll('.btn.btn-light').forEach(item => {
             item.addEventListener('click', event => {
               // Обработчик нажатия на каждую кнопку
-              var uniqueId = parseInt(event.target.closest('tr').dataset.uniqueId, 10);
-              var article = articles[uniqueId];
+              let coords = {{ coords | safe }},
+                  articles = {{ articles | safe }},
+                  uniqueId = parseInt(event.target.closest('tr').dataset.uniqueId, 10);
+              let article = articles[uniqueId],
+                  point = coords[uniqueId];
               document.getElementById('field_text').textContent = article;
-              var place = places[uniqueId];
-              const url = "https://nominatim.openstreetmap.org/search?q=" + place + "&format=geocodejson";
-              let result;
-              $.get(url, function(data, status) {
-                if (data.features.length === 0) {
-                  alert("Ошибка: не удалось декодировать выбранный объект.\nВнимание: на карте остался предыдущий объект.");
-                } else {
-                  result = data.features[0].geometry.coordinates;
-                  longitude = result[1];
-                  latitude = result[0];
-                  document.getElementById('latitude').textContent = latitude;
-                  document.getElementById('longitude').textContent = longitude;
-                  update([longitude, latitude]);
-                }
-              });
+              document.getElementById('latitude').textContent = point[0];
+              document.getElementById('longitude').textContent = point[1];
+              show(point);
             });
-        });
+          });
         </script>
         <div class="row">
           <div class="col">
